@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # todo
 
 A new Flutter project.
@@ -14,3 +15,7 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+=======
+# to-do-mobile
+flutter &amp; dart draft
+>>>>>>> 028c5d14ffb66d2382aff4acd071e2a309550848
