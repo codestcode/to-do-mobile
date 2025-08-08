@@ -1,0 +1,14 @@
+{
+  "tasks": "Tasks",
+  "taskName": "Task Name",
+  "description": "Description",
+  "selectMonth": "Select Month",
+  "selectDay": "Select Day",
+  "addTask": "Add Task",
+  "cancel": "Cancel",
+  "add": "Add",
+  "logout": "Logout",
+  "settings": "Settings",
+  "darkMode": "Dark Mode",
+  "language": "Language"
+}

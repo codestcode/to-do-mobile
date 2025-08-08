@@ -4,9 +4,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../models/task.dart';
 import 'login_screen.dart';
+import '../l10n/app_localizations.dart';
+import 'settings_screen.dart';
 
 class TaskScreen extends StatefulWidget {
-  const TaskScreen({super.key});
+  final Function(bool, Locale) updateThemeAndLocale;
+
+  const TaskScreen({super.key, required this.updateThemeAndLocale});
 
   @override
   _TaskScreenState createState() => _TaskScreenState();
@@ -18,6 +22,7 @@ class _TaskScreenState extends State<TaskScreen> {
   String? _selectedMonth;
   String? _selectedDay;
   List<Task> _tasks = [];
+
   final List<String> _months = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
@@ -84,71 +89,129 @@ class _TaskScreenState extends State<TaskScreen> {
   }
 
   void _showAddTaskDialog() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF3D2C8D) : Colors.white;
+    final inputColor = isDark ? const Color(0xFF4A3F87) : Colors.grey[200]!;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final hintColor = isDark ? Colors.white70 : Colors.black45;
+    final buttonColor = isDark ? const Color(0xFF9336B4) : Theme.of(context).primaryColor;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Task'),
+        backgroundColor: bgColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(AppLocalizations.of(context)!.addTask, style: TextStyle(color: textColor)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Task Name'),
-              ),
-              TextField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
-              ),
-              DropdownButtonFormField<String>(
-                value: _selectedMonth,
-                hint: const Text('Select Month'),
-                items: _months.map((month) => DropdownMenuItem(
-                  value: month,
-                  child: Text(month),
-                )).toList(),
-                onChanged: (value) => setState(() => _selectedMonth = value),
-              ),
-              DropdownButtonFormField<String>(
-                value: _selectedDay,
-                hint: const Text('Select Day'),
-                items: _days.map((day) => DropdownMenuItem(
-                  value: day,
-                  child: Text(day),
-                )).toList(),
-                onChanged: (value) => setState(() => _selectedDay = value),
-              ),
+              _buildTextField(_nameController, AppLocalizations.of(context)!.taskName, inputColor, textColor, hintColor),
+              const SizedBox(height: 10),
+              _buildTextField(_descriptionController, AppLocalizations.of(context)!.description, inputColor, textColor, hintColor),
+              const SizedBox(height: 10),
+              _buildDropdown(_selectedMonth, _months, AppLocalizations.of(context)!.selectMonth, (value) => setState(() => _selectedMonth = value), inputColor, textColor, hintColor),
+              const SizedBox(height: 10),
+              _buildDropdown(_selectedDay, _days, AppLocalizations.of(context)!.selectDay, (value) => setState(() => _selectedDay = value), inputColor, textColor, hintColor),
             ],
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: hintColor)),
           ),
           ElevatedButton(
             onPressed: _addTask,
-            child: const Text('Add'),
+            style: ElevatedButton.styleFrom(backgroundColor: buttonColor),
+            child: Text(AppLocalizations.of(context)!.add, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
     );
   }
 
+  Widget _buildTextField(TextEditingController controller, String label, Color fillColor, Color textColor, Color hintColor) {
+    return TextField(
+      controller: controller,
+      style: TextStyle(color: textColor),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: hintColor),
+        filled: true,
+        fillColor: fillColor,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDropdown(String? value, List<String> items, String hint, void Function(String?) onChanged, Color fillColor, Color textColor, Color hintColor) {
+    return DropdownButtonFormField<String>(
+      value: value,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: fillColor,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+      ),
+      dropdownColor: fillColor,
+      iconEnabledColor: textColor,
+      hint: Text(hint, style: TextStyle(color: hintColor)),
+      style: TextStyle(color: textColor),
+      items: items.map((item) => DropdownMenuItem(
+        value: item,
+        child: Text(item, style: TextStyle(color: textColor)),
+      )).toList(),
+      onChanged: onChanged,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF2E0249) : Colors.white;
+    final cardColor = isDark ? const Color(0xFF4A3F87) : Colors.grey[100]!;
+    final appBarColor = isDark ? const Color(0xFF3D2C8D) : Theme.of(context).primaryColor;
+    final textColor = isDark ? Colors.white : Colors.black87;
+
     return Scaffold(
+      backgroundColor: bgColor,
       appBar: AppBar(
-        title: const Text('Tasks'),
+        backgroundColor: appBarColor,
+        title: Row(
+          children: [
+            Image.asset('lib/assets/images/icon.png', height: 40),
+            const SizedBox(width: 10),
+            Text('Do-ily', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: textColor)),
+          ],
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: Icon(Icons.logout, color: textColor),
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
               if (mounted) {
-                Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
               }
+            },
+            tooltip: AppLocalizations.of(context)!.logout,
+          ),
+          IconButton(
+            icon: Icon(Icons.settings, color: textColor),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SettingsScreen(
+                    updateThemeAndLocale: widget.updateThemeAndLocale,
+                  ),
+                ),
+              );
             },
           ),
         ],
@@ -157,24 +220,30 @@ class _TaskScreenState extends State<TaskScreen> {
         padding: const EdgeInsets.all(16.0),
         itemCount: _tasks.length,
         itemBuilder: (context, index) => Card(
+          color: cardColor,
           elevation: 4,
           margin: const EdgeInsets.symmetric(vertical: 8.0),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: ListTile(
-            title: Text(_tasks[index].name, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text('${_tasks[index].description}\nDue: ${_tasks[index].month} ${_tasks[index].day}'),
+            title: Text(_tasks[index].name, style: TextStyle(fontWeight: FontWeight.bold, color: textColor)),
+            subtitle: Text(
+              '${_tasks[index].description}\nDue: ${_tasks[index].month} ${_tasks[index].day}',
+              style: TextStyle(color: textColor.withOpacity(0.7)),
+            ),
             trailing: IconButton(
-              icon: const Icon(Icons.delete),
+              icon: Icon(Icons.delete, color: textColor),
               onPressed: () => _deleteTask(index),
             ),
           ),
         ),
       ),
       bottomNavigationBar: BottomAppBar(
+        color: appBarColor,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             IconButton(
-              icon: const Icon(Icons.add, size: 30),
+              icon: Icon(Icons.add, size: 30, color: textColor),
               onPressed: _showAddTaskDialog,
             ),
           ],

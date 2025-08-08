@@ -1,0 +1,14 @@
+{
+  "tasks": "المهام",
+  "taskName": "اسم المهمة",
+  "description": "الوصف",
+  "selectMonth": "اختر الشهر",
+  "selectDay": "اختر اليوم",
+  "addTask": "إضافة مهمة",
+  "cancel": "إلغاء",
+  "add": "إضافة",
+  "logout": "تسجيل الخروج",
+  "settings": "الإعدادات",
+  "darkMode": "الوضع المظلم",
+  "language": "اللغة"
+}
